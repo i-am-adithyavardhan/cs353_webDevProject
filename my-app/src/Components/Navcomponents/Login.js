@@ -5,10 +5,10 @@ import "./signup.css";
 import {useNavigate} from "react-router-dom";
 
 const Login = ({isLogin,onChangeLogin,handleLogin}) => {
-    const navigate= useNavigate();
-    if(isLogin){
-        navigate("/userprofile")
-    }
+    // const navigate= useNavigate();
+    // if(isLogin){
+    //     navigate("/userprofile")
+    // }
   return (
     <div className="s-content">
         <div className="title"><strong>Login</strong></div>

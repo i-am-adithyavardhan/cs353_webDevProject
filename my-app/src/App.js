@@ -1,20 +1,20 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route,useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, } from "react-router-dom";
 import Navbar from "./Components/Navbar/Navbar";
 import Home from "./Components/Navcomponents/Home";
-import Profile from "./Components/Navcomponents/Profile";
 import Blogs from "./Components/Blogspage/Blogs";
 import Signup from "./Components/Navcomponents/Signup";
 import { useState, useEffect} from "react";
 import axios from "axios";
 import Login from "./Components/Navcomponents/Login";
 import Userprofilemain from "./Components/Userprofilepage/Userprofilemain";
+import CreateBlogmain from "./Components/CreateBlogpage/CreateBlogmain";
 
 
 function App() {
-  //useNavigate instance for navigating pages
-  const navigate = useNavigate()
-  const [isLogin,setIsLogin]=useState("false")
+  
+  
+  const [isLogin,setIsLogin]=useState(false)
 
   const [data, setData] = useState([]); //for blogs page
   // useEffect(() => {
@@ -75,29 +75,14 @@ function App() {
     // console.log(res.data);
     
     if (res.data.includes("ok")) {
-      navigate("/userprofile");
-      //alert("SIgn up successful")
+      alert("SIgn up successful")
+      window.location.href="/"
     } else {
       alert(res.data)
     }
   }
     };
-     //user has clicked submit!'
-    // fetch("http://localhost:5000/signup",{
-    //   method: "POST",
-    //   headers: {'Content-Type': 'application/json'},
-    //   body:JSON.stringify(formdata)
-    // })
-
-
-  //   const res = await axios.post("http://localhost:5000/signup", formdata);
-  //   // console.log(res.data);
-  //   if (res.data.includes("ok")) {
-  //     alert("SIgn up successful")
-  //   } else {
-  //     alert(res.data)
-  //   }
-  // }
+  
 
   useEffect(()=>{
     console.log(formErrors);
@@ -151,23 +136,30 @@ function App() {
   const handleLogin = async(e)=>{
     e.preventDefault();
     const res = await axios.post("http://localhost:5000/login", loginData);
+    // const data = await res.json();
+    console.log(typeof(res));
+    console.log("check")
+    console.log(res.data.user);
+    if(res.data.user){
+      alert("login successful");
+      window.location.href="/userprofile"
+    }
+    else{
+      alert("Invalid username or password");
+    }
     // .then()
     console.log(res.data);
    // const isLogin = res.data.status;
-   
-    if(res.data.status==="ok"){
-      alert("successfuly logged in");
-      setIsLogin("true");
-    }
-    else{
-      alert(res.data.error);
-    }
+
+   //With frontend navigation
+    // if(res.data.status==="ok"){
+    //   alert("successfuly logged in");
+    //   setIsLogin("true");
+    // }
+    // else{
+    //   alert(res.data.error);
+    // }
     
-     
-    // if (res.includes("ok")) {
-    //   alert("Login successful")
-    // } else {
-    //   alert(res.data)
     }
     //console.log(loginData);
     
@@ -211,6 +203,11 @@ function App() {
             onChangeLogin={onChangeLogin}
             isLogin={isLogin}
              />
+          }/>
+          <Route
+          path="/createblog"
+          element = {
+            <CreateBlogmain/>
           }/>
              
 

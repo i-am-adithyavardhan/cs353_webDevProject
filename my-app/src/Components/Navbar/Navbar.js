@@ -10,7 +10,9 @@ const Navbar = () => {
     const navigate = useNavigate();
     const gotoLogin = ()=>{
        navigate("/login");
-
+  }
+  const gotoCreateBlog=()=>{
+    navigate("/createblog");
   }
 
   return (
@@ -37,7 +39,7 @@ const Navbar = () => {
 
                 </li>
                 <li className="nav-links">
-                     <button className='cpost' >New Post</button>
+                     <button className='cpost' onClick={gotoCreateBlog}>New Post</button>
 
                 </li>
                 <li className="nav-links">

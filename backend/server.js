@@ -10,9 +10,12 @@ const Post = require("./models/Post");
 const cors = require('cors');
 const jwt = require("jsonwebtoken")
 
+// const secrets = require('./config/config1.js')
+const dotenv = require("dotenv");
+dotenv.config({ path: "./config/.env" });
 app.use(cors());
 app.use(bodyParser.json())
-const JWT_SECRET = "somethingisfishy3524521";
+// const JWT_SECRET = "somethingisfishy3524521";
 
 
 // const postRouter = require("./postRouter");
@@ -97,15 +100,18 @@ app.post("/login", async (req, res) => {
 
       if (isValid) {
         // res.status(200).send("You have logged in successfully!");
-        return res.json({status:"ok",data:"successful login"});
-
+        //return res.json({status:"ok",data:"successful login"});
+      
         // jwt token
-        // const token = jwt.sign({},JWT_SECRET);
-        // if(res.status(201)){
-        //   return res.json({status : "ok",data: token});
-        // }else{
-        //   return res.json({status: "error"});
-        // }
+        // console.log(secret)
+       const secrets = process.env.JWT_KEY
+      //  console.log(secrets)
+       const token = jwt.sign({
+          userId: user._id,
+          username: user.username
+        },secrets,{expiresIn : "30d"}) //check
+        return res.json({status:"ok",user:token})
+       
       } 
       else {
         res.json({status:"error",error:"Wrong Password!"});
