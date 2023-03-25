@@ -9,10 +9,10 @@ import axios from "axios";
 import Login from "./Components/Navcomponents/Login";
 import Userprofilemain from "./Components/Userprofilepage/Userprofilemain";
 import CreateBlogmain from "./Components/CreateBlogpage/CreateBlogmain";
+//import { useNavigate } from "react-router-dom";
 
 
 function App() {
-  
   
   const [isLogin,setIsLogin]=useState(false)
 
@@ -32,11 +32,11 @@ function App() {
   // }, []);
 
   const [categories, setCategories] = useState([
-    "Web Dev",
-    "Machine Learning",
-    "Computer Networks",
-    "NLP",
-    "Cloud",
+    {id:1,value:"Web Dev",label: "WEB"},
+    {id:2,value:"Machine Learning",label: "ML"},
+    {id:3,value:"Computer Networks",label: "CN"},
+    {id:4,value:"NLP",label:"NLP"},
+    {id:5,value:"Cloud",label:"Cloud"}
   ]);
   const defaultData = {
     name: "",
@@ -68,6 +68,7 @@ function App() {
     const errors =validate(formdata)
     setFormErrors(errors || {});
     console.log("No.of formerrors"+Object.keys(errors).length);
+    console.log(formdata);
     
     if(Object.keys(errors).length===0){
       setIsSubmit(true);
@@ -135,12 +136,14 @@ function App() {
   }
   const handleLogin = async(e)=>{
     e.preventDefault();
+    try{
     const res = await axios.post("http://localhost:5000/login", loginData);
     // const data = await res.json();
-    console.log(typeof(res));
+    console.log(typeof(res.data));
     console.log("check")
     console.log(res.data.user);
     if(res.data.user){
+      localStorage.setItem("user", JSON.stringify(res.data.user))
       alert("login successful");
       window.location.href="/userprofile"
     }
@@ -148,7 +151,7 @@ function App() {
       alert("Invalid username or password");
     }
     // .then()
-    console.log(res.data);
+    console.log(res);
    // const isLogin = res.data.status;
 
    //With frontend navigation
@@ -159,6 +162,10 @@ function App() {
     // else{
     //   alert(res.data.error);
     // }
+  }
+    catch(err){
+      console.log(err);
+    }
     
     }
     //console.log(loginData);
@@ -175,14 +182,14 @@ function App() {
             path="/Blogs"
             element={
               <Blogs
-                data={data}
-                setData={setData}
+                // data={data}
+                // setData={setData}
                 categories={categories}
                 setCategories={setCategories}
               />
             }
           />
-          <Route path="/userprofile" element={<Userprofilemain />} />
+          <Route path="/userprofile" element={<Userprofilemain isLogin={isLogin}/>} />
           <Route
             path="/signup"
             element={
@@ -201,13 +208,12 @@ function App() {
             <Login 
             handleLogin={handleLogin}
             onChangeLogin={onChangeLogin}
-            isLogin={isLogin}
              />
           }/>
           <Route
           path="/createblog"
           element = {
-            <CreateBlogmain/>
+            <CreateBlogmain categories={categories}/>
           }/>
              
 

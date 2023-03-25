@@ -8,65 +8,19 @@ const path = require("path");
 const User = require("./models/User");
 const Post = require("./models/Post");
 const cors = require('cors');
-const jwt = require("jsonwebtoken")
-
-// const secrets = require('./config/config1.js')
+const multer = require("multer");
+const upload = multer({dest: './uploads/'})
 const dotenv = require("dotenv");
+const fs = require("fs");
 dotenv.config({ path: "./config/.env" });
 app.use(cors());
 app.use(bodyParser.json())
-// const JWT_SECRET = "somethingisfishy3524521";
 
-
-// const postRouter = require("./postRouter");
-// // mongoose
-// //   .connect(
-// //     "mongodb+srv://saivikas:Vikas%402003@mongodb-demo.21lkg2i.mongodb.net/User1db?retryWrites=true&w=majority"
-// //   )
-// //   .then(() => console.log("Db connected"))
-// //   .catch((err) => console.log(err.message));
 
 db();
 app.use(bodyParser.urlencoded({ extended: true}));
 
-// });
-
-// //mongodb data
-
-// const data = mongoose.model("User",UserSchema); //new collection which follows the above userschema structure
-
-// /*const user1 = new User({
-//     name: 'Adithya',
-//     username: 'adithya-vardhan',
-//     password: '12345678',
-//     phone: 9000710046,
-//     dob: 06-03-2003
-// });
-
-// const user2 = new User({
-//     name: 'Vikas',
-//     username: 'sai-vikas',
-//     password : '87654321',
-//     phone: 9094537639,
-//     dob : "07-05-2002"
-// });
-
-// const user3 = new User({
-//     name: "Anirudh",
-//     username: "anirudh",
-//     password : '1234578',
-//     phone: 8989731230,
-//     dob: "09-08-2002"
-// });
-
-// User.insertMany([user1,user2,user3],function(err){
-//     if(err){
-//         console.log(err);
-//     }
-//     else{
-//         console.log("successfully saved all users to user1 collection");
-//     }
-// })*/
+// app.use("./uploads")
 
 // // bcrypt
 // app.get("/Blogs",async(req,res)=>{
@@ -92,8 +46,8 @@ app.post("/login", async (req, res) => {
     const user = await User.findOne({ username: loginData.username });
     //console.log(user);
     if (!user) {
-      res.status(404).send("<h2>User not found</h2>");
-      res.end();
+      res.send("<h2>User not found</h2>");
+      return
     } 
     else {
       const isValid = await bcrypt.compare(loginData.password, user.password);
@@ -101,28 +55,74 @@ app.post("/login", async (req, res) => {
       if (isValid) {
         // res.status(200).send("You have logged in successfully!");
         //return res.json({status:"ok",data:"successful login"});
-      
-        // jwt token
-        // console.log(secret)
-       const secrets = process.env.JWT_KEY
-      //  console.log(secrets)
-       const token = jwt.sign({
-          userId: user._id,
-          username: user.username
-        },secrets,{expiresIn : "30d"}) //check
-        return res.json({status:"ok",user:token})
+        const { password, cpassword, ...other } = user._doc;
+        console.log(other)
+        return res.json({status:"ok",user: user})
        
       } 
       else {
-        res.json({status:"error",error:"Wrong Password!"});
+       return res.json({status:"error",error:"Wrong Password!", password: user.password});
       }
     }
     // console.log(req.body.password);
   } catch (err) {
     console.log(err);
+    res.json(err);
   }
 });
+ 
 
+app.post("/createblog",upload.single("image"),async(req,res)=>{
+  // const blogData = req.body;
+  // const imgData  = req.file;
+  // console.log("in backend!")
+  // console.log(blogData);
+  // console.log(imgData);
+  console.log(req.file);
+  console.log(req.body);
+  const image = req.file.filename;
+  const title = req.body.title;
+  const description = req.body.description;
+  const category = req.body.category;
+  const username= req.body.username;
+
+  let fileType = req.file.mimetype.split("/")[1]; //mimetype : img/jpeg 
+  let newFileName = req.file.filename+ "."+ fileType;
+  console.log(fileType);
+  console.log(newFileName);
+  fs.rename(`./uploads/${req.file.filename}`,`./uploads/${newFileName}`,()=>{
+    console.log("callback");
+  })
+  try{
+    const userfound = await User.findOne({username:username});
+    if(!userfound){
+      return res.json({msg: "User not found"});
+    }
+    const savedBlog = await Post.create({
+      title:title,
+      description:description,
+      category:category,
+      image:newFileName,
+      author:username,
+    })
+
+    userfound.blogs.push(savedBlog);
+    userfound.noOfBlogs+=1;
+    await userfound.save();
+
+
+  } catch(err) {
+    console.log(err)
+  }
+   
+  
+  //console.log(req.file.filename);
+
+  // console.log(desc);
+
+  res.json(200);
+  // res.json("received"+blogData);
+})
 // app.get("/userprofile", async function (req, res) {
 //   // await res.sendFile(__dirname+"/userprofile.hbs");
 //   // res.setHeader('Content-Type', 'application/javascript');
@@ -158,18 +158,7 @@ app.post("/login", async (req, res) => {
 
 // });
 
-// //This get function is for rendering loading the javascript file after cliking the post button
-// app.get("/postblog.js", function (req, res) {
-//    res.setHeader("Content-Type", "application/javascript");
-//   res.sendFile(__dirname + "/postblog.js");
-// });
 
-// app.get("/uservalidation.js", function (req, res) {
-//   res.setHeader("Content-Type", "application/javascript");
-//   res.sendFile(__dirname + "/uservalidation.js");
-// });
-// // app.use(express.static('public'));
-// // app.post("/userprofile")
 
 
 app.post("/signup", async function (req, res) {
@@ -204,6 +193,8 @@ catch(err){
 }
   //console.log(req.body.password);
 });
+
+
 
 
 

@@ -20,22 +20,45 @@ const UserSchema = new mongoose.Schema({
     required: [true, "Password is required"],
   },
   cpassword:{
-    type:String,
-    required: [true,"Confirm Password is required"]
+    type:String
   },
   phone: Number,
   email: String,
-  posts:[
+  bio :  String,
+  blogs:[
     {
       type: String,
       ref: "Post",
     }
   ],
-  noOfPosts:{
+  noOfBlogs:{
     type:Number,
     default:0
-  }
-});
+  },
+  isFollowing:[
+    {
+      type:String,
+      ref:"User",
+    }
+  ],
+  followers:[
+    {
+      type:String,
+      ref:"User",
+    }
+  ],
+  deletedBlogs:[
+    {
+      type:String,
+      ref:"Post",
+    }
+  ],
+  isAdmin:{
+    type:Boolean,
+    default:false,
+  }},
+  {timestamps:true}
+);
 
 UserSchema.pre("save", async function (next) {
   // console.log("hi from inside");

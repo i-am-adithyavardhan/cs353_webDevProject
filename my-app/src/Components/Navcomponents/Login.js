@@ -4,7 +4,7 @@ import padlock from "../Images/padlock.png";
 import "./signup.css";
 import {useNavigate} from "react-router-dom";
 
-const Login = ({isLogin,onChangeLogin,handleLogin}) => {
+const Login = ({onChangeLogin,handleLogin}) => {
     // const navigate= useNavigate();
     // if(isLogin){
     //     navigate("/userprofile")

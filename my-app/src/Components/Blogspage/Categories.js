@@ -2,18 +2,15 @@ import React from "react";
 
 const Categories = ({ categories }) => {
   return (
-    <>
+    <div className="category-container">
           {categories.map((cat) => {
         return (
-          <>
-            <h1>{cat[0]}</h1>
-            <h2>{cat[1]}</h2>
-            <p>{cat[2]}</p>
-            {console.log(cat)}
-          </>
+          <div key={cat.id}>
+            <h3>{cat.value}</h3>
+          </div>
         );
       })}
-    </>
+    </div>
   );
 };
 

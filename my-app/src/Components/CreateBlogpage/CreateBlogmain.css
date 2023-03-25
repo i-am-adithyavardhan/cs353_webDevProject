@@ -49,11 +49,15 @@
     border-radius:5px;
     border: 2px solid #ccc;
 }
+textarea{
+    resize:none;
+}
 .descfield{
     height:200px;
     width:390px;
     border-radius:5px;
     border: 2px solid #ccc;
+
     /* overflow-y: scroll;
     scrollbar-width: thin; */
 }
