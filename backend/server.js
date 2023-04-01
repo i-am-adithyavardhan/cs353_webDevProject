@@ -8,8 +8,8 @@ const path = require("path");
 const User = require("./models/User");
 const Post = require("./models/Post");
 const cors = require('cors');
-const multer = require("multer");
-const upload = multer({dest: './uploads/'})
+// const multer = require("multer");
+// const upload = multer({dest: './uploads/'})
 const dotenv = require("dotenv");
 const fs = require("fs");
 dotenv.config({ path: "./config/.env" });
@@ -72,89 +72,124 @@ app.post("/login", async (req, res) => {
 });
  
 
-app.post("/createblog",upload.single("image"),async(req,res)=>{
-  // const blogData = req.body;
-  // const imgData  = req.file;
-  // console.log("in backend!")
-  // console.log(blogData);
-  // console.log(imgData);
-  console.log(req.file);
-  console.log(req.body);
-  const image = req.file.filename;
+app.post("/createblog",async(req,res)=>{
+  // console.log(req.body);
   const title = req.body.title;
   const description = req.body.description;
   const category = req.body.category;
-  const username= req.body.username;
-
-  let fileType = req.file.mimetype.split("/")[1]; //mimetype : img/jpeg 
-  let newFileName = req.file.filename+ "."+ fileType;
-  console.log(fileType);
-  console.log(newFileName);
-  fs.rename(`./uploads/${req.file.filename}`,`./uploads/${newFileName}`,()=>{
-    console.log("callback");
-  })
+  const username= req.body.username; //username
+  const image = req.body.image;
+  console.log("body --- ");
+  console.log(req.body)
+  // console.log("image : " + image);
   try{
-    const userfound = await User.findOne({username:username});
-    if(!userfound){
-      return res.json({msg: "User not found"});
-    }
-    const savedBlog = await Post.create({
-      title:title,
-      description:description,
-      category:category,
-      image:newFileName,
-      author:username,
-    })
+        const userfound = await User.findOne({username:username});
+        if(!userfound){
+          return res.json({msg: "User not found"});
+        }
+        console.log(userfound)
+        const savedBlog = await Post.create({
+          title:title,
+          description:description,
+          category:category, //change 
+          image:image,
+          author:username,
+        })
+        
+      userfound.blogs.push(savedBlog);
+      userfound.noOfBlogs+=1;
+       //await userfound.updateOne({$set:{noOfBlogs: userfound.noOfBlogs+1}},{$push: {blogs: savedBlog}})
 
-    userfound.blogs.push(savedBlog);
-    userfound.noOfBlogs+=1;
-    await userfound.save();
+        await userfound.save();
+        
+      }
+
+      catch(err) {
+            console.log(err)
+         }
+    res.json(200);
+
+})
+
+// app.post("/createblog",upload.single("image"),async(req,res)=>{
+  
+//   console.log(req.file);
+//   console.log(req.body);
+//   const image = req.file.filename;
+//   const title = req.body.title;
+//   const description = req.body.description;
+//   const category = req.body.category;
+//   const username= req.body.username;
+
+//   let fileType = req.file.mimetype.split("/")[1]; //mimetype : img/jpeg 
+//   let newFileName = req.file.filename+ "."+ fileType;
+//   console.log(fileType);
+//   console.log(newFileName);
+//   fs.rename(`./uploads/${req.file.filename}`,`./uploads/${newFileName}`,()=>{
+//     console.log("callback");
+//   })
+//   try{
+//     const userfound = await User.findOne({username:username});
+//     if(!userfound){
+//       return res.json({msg: "User not found"});
+//     }
+//     const savedBlog = await Post.create({
+//       title:title,
+//       description:description,
+//       category:category,
+//       image:newFileName,
+//       author:username,
+//     })
+
+//     userfound.blogs.push(savedBlog);
+//     userfound.noOfBlogs+=1;
+//     await userfound.save();
 
 
-  } catch(err) {
-    console.log(err)
-  }
+//   } catch(err) {
+//     console.log(err)
+//   }
    
   
-  //console.log(req.file.filename);
+//   //console.log(req.file.filename);
 
-  // console.log(desc);
+//   // console.log(desc);
 
-  res.json(200);
-  // res.json("received"+blogData);
-})
-// app.get("/userprofile", async function (req, res) {
-//   // await res.sendFile(__dirname+"/userprofile.hbs");
-//   // res.setHeader('Content-Type', 'application/javascript');
-//   res.render("userprofile");
-// });
+//   res.json(200);
+//   // res.json("received"+blogData);
+// })
+// // app.get("/userprofile", async function (req, res) {
+// //   // await res.sendFile(__dirname+"/userprofile.hbs");
+// //   // res.setHeader('Content-Type', 'application/javascript');
+// //   res.render("userprofile");
+// // });
 
-// app.post("/userprofile",async function (req,res){
-//   try{
-//     const savedPost = await Post.create({
-//         title: req.body.title,
-//         description: req.body.description,
-//         author: req.body.author,
-//     });
-//     //find user and save post in user.posts 
-//     const usrFound = await User.findOne({username: req.body.author});
-//     if(!usrFound){
-//         return res.json({msg: "User not found"});
-//     }
-//     usrFound.posts.push(savedPost._id);
-//     usrFound.noOfPosts = usrFound.noOfPosts+1;
-//     const nPosts = usrFound.noOfPosts;
-//     await usrFound.save();
+// // app.post("/userprofile",async function (req,res){
+// //   try{
+// //     const savedPost = await Post.create({
+// //         title: req.body.title,
+// //         description: req.body.description,
+// //         author: req.body.author,
+// //     });
+// //     //find user and save post in user.posts 
+// //     const usrFound = await User.findOne({username: req.body.author});
+// //     if(!usrFound){
+// //         return res.json({msg: "User not found"});
+// //     }
+// //     usrFound.posts.push(savedPost._id);
+// //     usrFound.noOfPosts = usrFound.noOfPosts+1;
+// //     const nPosts = usrFound.noOfPosts;
+// //     await usrFound.save();
     
-//     res.status(200).send("Successfully saved "+ "No of posts from user : "+nPosts);
+// //     res.status(200).send("Successfully saved "+ "No of posts from user : "+nPosts);
 
-//     // res.redirect("/posts");
-//     // res.json(savedPost); //check this
+// //     // res.redirect("/posts");
+// //     // res.json(savedPost); //check this
     
-//   }
-//   catch(err){
-//     res.json({message: err})
-//   }
+// //   }
+// //   catch(err){
+// //     res.json({message: err})
+// //   }
 
 // });
 

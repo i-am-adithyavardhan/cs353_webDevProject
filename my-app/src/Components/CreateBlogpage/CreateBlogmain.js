@@ -28,7 +28,7 @@
 
 import React from 'react'
 import Blogcategory from './Blogcategory'
-import Blogimage from './Blogimage'
+//import Blogimage from './Blogimage'
 import "./CreateBlogmain.css"
 import {useState,useEffect} from 'react'
 import axios from "axios"
@@ -44,45 +44,33 @@ const CreateBlogmain = ({categories}) => {
 
   const handleSubmit = async(e)=>{
     e.preventDefault();
-    const formdata = new FormData();
-    const myData = JSON.parse(localStorage.getItem("user"))["username"];
-    console.log(myData);
-    formdata.append("image",file);
-    formdata.append("description",blogData["description"]);
-    formdata.append("title",blogData["title"]);
-    formdata.append("category",blogData["category"]);
-    formdata.append("username",myData);
-
-    const res = await axios.post("http://localhost:5000/createblog",formdata,{headers:{'Content-Type':'multipart/form-data'}});
+    // const formdata = new FormData();
+    const username = JSON.parse(localStorage.getItem("user"))["username"];
+    // console.log(myData);
+    // console.log(file);
+    const base64 = await convertTOBase64(file);
+    const newData = {username,...blogData,image: base64}
+    console.log(newData)
+    const res = await axios.post("http://localhost:5000/createblog",newData);
     console.log("response"+res.data)
   }
 
-
-
-  // const handleSubmit= async(e)=>{
-  //   console.log("hhiii")
-  //   e.preventDefault();
-  //   console.log("hello");
-  //   const myData = JSON.parse(localStorage.getItem("user"))["username"];
-  //   // JSON.parse(localStorage.getItem("user"))._doc.username
-  //   console.log(myData);
-  //   console.log(typeof(myData));
-  //   const a = {...blogData,username: myData};
-  //   console.log(a);
-  //   try{
-  //     const res = await axios.post("http://localhost:5000/createblog",a);
-  //     console.log(res);
-  //   }
-  //   catch(err){
-  //     console.log(err);
-  //   }
-  //   // return
-  // }
   const handleChange=(e)=>{
     setBlogData({...blogData,[e.target.name] : e.target.value})
     console.log(blogData);
   }
-  // useEffect(()=>{console.log(blogData)},[blogData])
+  const convertTOBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
 
   return (
       <div className="createblog-container">
@@ -102,13 +90,22 @@ const CreateBlogmain = ({categories}) => {
             <label htmlFor='addimg'>
                 Add Image
               </label>
-              <input type="file" accept = "image/*" id='addimg' filename={file} onChange = {(e)=>{
+              <input
+        type="file"
+        id="addimg"
+        accept='image/*'
+        onChange= {(e)=>setFile(e.target.files[0])}
+      />
+
+      <img src={file} alt="Blog pic" width={100} height={100} />
+
+              {/* <input type="file" accept = "image/*" id='addimg' filename={file} onChange = {(e)=>{
                 console.log(e.target.files[0]);
                 setFile(e.target.files[0]);
                 setBlogData({...blogData,'image':e.target.files[0]});
                 }}/>
-              <img src={file}/>
-            </div>
+              <img src={file}/> */}
+    </div>
             <button type='submit' className='blog-items' id="create-post">Create</button>
         </form>
     </div>
@@ -116,19 +113,3 @@ const CreateBlogmain = ({categories}) => {
 }
 
 export default CreateBlogmain
-
-
-
-
-
-
-//extra
-            {/* <div className='blog-items'>
-              <label>Add Image</label>
-              <input type="file" onChange = {(e)=>{
-                console.log(e.target.files[0]);
-                setFile(URL.createObjectURL(e.target.files[0]));
-                }}/>
-              <img src={file} />
-              <button type='button' onClick={()=>{console.log("clicked");setFile(null)}}>Remove </button>
-            </div> */}

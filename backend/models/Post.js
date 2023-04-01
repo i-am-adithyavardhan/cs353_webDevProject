@@ -10,7 +10,7 @@ const PostSchema = new mongoose.Schema({
         required:[true,"Description is required"],
     },
     category:{
-        type:String,
+        type:Array,
         required:[true,"Blog category is required"],
         default:"All",
     },
@@ -21,7 +21,7 @@ const PostSchema = new mongoose.Schema({
     },
     image:{
         type:String,
-        default:"https://images.pexels.com/photos/6469/red-hands-woman-creative.jpg?auto=compress&cs=tinysrgb&w=600",
+        default:"",
     },
     noOfViews:{
         type: Number,
