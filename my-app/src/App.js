@@ -72,15 +72,20 @@ function App() {
     
     if(Object.keys(errors).length===0){
       setIsSubmit(true);
-      const res = await axios.post("http://localhost:5000/signup", formdata);
+      try{
+        const res = await axios.post("http://localhost:5000/api/auth/signup", formdata);
+        if (res.data.includes("ok")) {
+          alert("SIgn up successful")
+          window.location.href="/"
+        } else {
+          alert(res.data)
+        }
+      }
+      catch(err){
+        console.log(err)
+      }
+      
     // console.log(res.data);
-    
-    if (res.data.includes("ok")) {
-      alert("SIgn up successful")
-      window.location.href="/"
-    } else {
-      alert(res.data)
-    }
   }
     };
   
@@ -137,7 +142,7 @@ function App() {
   const handleLogin = async(e)=>{
     e.preventDefault();
     try{
-    const res = await axios.post("http://localhost:5000/login", loginData);
+    const res = await axios.post("http://localhost:5000/api/auth/login", loginData);
     // const data = await res.json();
     console.log(typeof(res.data));
     console.log("check")

@@ -1,13 +1,17 @@
 const express = require("express");
-const bodyParser = require("body-Parser");
+const bodyParser = require("body-parser");
 const db = require("./config/conn");
 const app = express();
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
+const bcrypt = require("bcrypt");
 const path = require("path");
 const User = require("./models/User");
 const Post = require("./models/Post");
 const cors = require('cors');
+const userRoute = require("./routes/users");
+const authRoute = require("./routes/auth");
+const postRoute = require("./routes/posts");
+
 // const multer = require("multer");
 // const upload = multer({dest: './uploads/'})
 const dotenv = require("dotenv");
@@ -18,7 +22,12 @@ app.use(bodyParser.json())
 
 
 db();
-app.use(bodyParser.urlencoded({ extended: true}));
+//middle wares
+// app.use(bodyParser.urlencoded({ extended: true}));
+app.use(express.json())
+app.use("/api/users",userRoute); //whenever we go to that adress, it will launch the userRoute    rest API
+app.use("/api/auth",authRoute);
+app.use("/api/blogs",postRoute);
 
 // app.use("./uploads")
 
@@ -35,81 +44,81 @@ app.use(bodyParser.urlencoded({ extended: true}));
 //   }
 // })
 
-app.get("/Blogs",(req,res)=>{
-  Post.find({}).then((items)=>{res.json(items) ;console.log(items)}).catch((err)=>console.log(err));
-});
+// app.get("/Blogs",(req,res)=>{
+//   Post.find({}).then((items)=>{res.json(items) ;console.log(items)}).catch((err)=>console.log(err));
+// });
 
-app.post("/login", async (req, res) => {
-  const loginData = req.body;
-  try {
+// app.post("/login", async (req, res) => {
+//   const loginData = req.body;
+//   try {
 
-    const user = await User.findOne({ username: loginData.username });
-    //console.log(user);
-    if (!user) {
-      res.send("<h2>User not found</h2>");
-      return
-    } 
-    else {
-      const isValid = await bcrypt.compare(loginData.password, user.password);
+//     const user = await User.findOne({ username: loginData.username });
+//     //console.log(user);
+//     if (!user) {
+//       res.send("<h2>User not found</h2>");
+//       return
+//     } 
+//     else {
+//       const isValid = await bcrypt.compare(loginData.password, user.password);
 
-      if (isValid) {
-        // res.status(200).send("You have logged in successfully!");
-        //return res.json({status:"ok",data:"successful login"});
-        const { password, cpassword, ...other } = user._doc;
-        console.log(other)
-        return res.json({status:"ok",user: user})
+//       if (isValid) {
+//         // res.status(200).send("You have logged in successfully!");
+//         //return res.json({status:"ok",data:"successful login"});
+//         const { password, cpassword, ...other } = user._doc;
+//         console.log(other)
+//         return res.json({status:"ok",user: user})
        
-      } 
-      else {
-       return res.json({status:"error",error:"Wrong Password!", password: user.password});
-      }
-    }
-    // console.log(req.body.password);
-  } catch (err) {
-    console.log(err);
-    res.json(err);
-  }
-});
+//       } 
+//       else {
+//        return res.json({status:"error",error:"Wrong Password!", password: user.password});
+//       }
+//     }
+//     // console.log(req.body.password);
+//   } catch (err) {
+//     console.log(err);
+//     res.json(err);
+//   }
+// });
  
 
-app.post("/createblog",async(req,res)=>{
-  // console.log(req.body);
-  const title = req.body.title;
-  const description = req.body.description;
-  const category = req.body.category;
-  const username= req.body.username; //username
-  const image = req.body.image;
-  console.log("body --- ");
-  console.log(req.body)
-  // console.log("image : " + image);
-  try{
-        const userfound = await User.findOne({username:username});
-        if(!userfound){
-          return res.json({msg: "User not found"});
-        }
-        console.log(userfound)
-        const savedBlog = await Post.create({
-          title:title,
-          description:description,
-          category:category, //change 
-          image:image,
-          author:username,
-        })
+// app.post("/createblog",async(req,res)=>{
+//   // console.log(req.body);
+//   const title = req.body.title;
+//   const description = req.body.description;
+//   const category = req.body.category;
+//   const username= req.body.username; //username
+//   const image = req.body.image;
+//   console.log("body --- ");
+//   console.log(req.body)
+//   // console.log("image : " + image);
+//   try{
+//         const userfound = await User.findOne({username:username});
+//         if(!userfound){
+//           return res.json({msg: "User not found"});
+//         }
+//         console.log(userfound)
+//         const savedBlog = await Post.create({
+//           title:title,
+//           description:description,
+//           category:category, //change 
+//           image:image,
+//           author:username,
+//         })
         
-      userfound.blogs.push(savedBlog);
-      userfound.noOfBlogs+=1;
-       //await userfound.updateOne({$set:{noOfBlogs: userfound.noOfBlogs+1}},{$push: {blogs: savedBlog}})
+//       userfound.blogs.push(savedBlog);
+//       userfound.noOfBlogs+=1;
+//        //await userfound.updateOne({$set:{noOfBlogs: userfound.noOfBlogs+1}},{$push: {blogs: savedBlog}})
 
-        await userfound.save();
+//         await userfound.save();
         
-      }
+//       }
 
-      catch(err) {
-            console.log(err)
-         }
-    res.json(200);
+//       catch(err) {
+//             console.log(err)
+//          }
+//     res.json(200);
 
-})
+// })
 
 // app.post("/createblog",upload.single("image"),async(req,res)=>{
   
@@ -196,38 +205,38 @@ app.post("/createblog",async(req,res)=>{
 
 
 
-app.post("/signup", async function (req, res) {
+// app.post("/signup", async function (req, res) {
   
-  const formdata = req.body;
-  const userexist = await User.findOne({username:formdata.uname});
-  console.log(userexist)
-  if(userexist){
-    res.send("Username already exists");
-    return
-  }
-  console.log(formdata);
+//   const formdata = req.body;
+//   const userexist = await User.findOne({username:formdata.uname});
+//   console.log(userexist)
+//   if(userexist){
+//     res.send("Username already exists");
+//     return
+//   }
+//   console.log(formdata);
 
   
-  // console.log(req.body)
-  try{
-  const user1 = await User({
-    name: formdata.name,
-    //dob: dob1,
-    username: formdata.uname,
-    password: formdata.pswd,
-    cpassword: formdata.cpswd,
-    phone: formdata.phonenumber,
-    email: formdata.email,
-  });
-  await user1.save();
+//   // console.log(req.body)
+//   try{
+//   const user1 = await User({
+//     name: formdata.name,
+//     //dob: dob1,
+//     username: formdata.uname,
+//     password: formdata.pswd,
+//     cpassword: formdata.cpswd,
+//     phone: formdata.phonenumber,
+//     email: formdata.email,
+//   });
+//   await user1.save();
   
-  res.status(200).send("ok");
-}
-catch(err){
-  res.send("User not stored in db");
-}
-  //console.log(req.body.password);
-});
+//   res.status(200).send("ok");
+// }
+// catch(err){
+//   res.send("User not stored in db");
+// }
+//   //console.log(req.body.password);
+// });
 
 
 

@@ -45,13 +45,14 @@ const CreateBlogmain = ({categories}) => {
   const handleSubmit = async(e)=>{
     e.preventDefault();
     // const formdata = new FormData();
-    const username = JSON.parse(localStorage.getItem("user"))["username"];
+    const userId = JSON.parse(localStorage.getItem("user"))["_id"];
+    console.log(userId)
     // console.log(myData);
     // console.log(file);
     const base64 = await convertTOBase64(file);
-    const newData = {username,...blogData,image: base64}
+    const newData = {userId,...blogData,image: base64}
     console.log(newData)
-    const res = await axios.post("http://localhost:5000/createblog",newData);
+    const res = await axios.post("http://localhost:5000/api/blogs/createblog",newData);
     console.log("response"+res.data)
   }
 
