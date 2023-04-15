@@ -11,7 +11,7 @@ const Blogs = ({ categories }) => {
   // console.log(userId)
   useEffect(() => {
     axios
-      .get(`http://localhost:5000/api/blogs/timeline/$(userId)`, {})
+      .get("http://localhost:5000/api/blogs/timeline/"+userId, {})
       // .then((res) => {
       //   console.log(res);
       //   setData(data);

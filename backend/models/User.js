@@ -6,10 +6,6 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: [true, "Name is required"],
   },
-  /*dob: {
-    type: String,
-    required: [false],
-  },*/
   username: {
     type: String,
     unique: true,
@@ -18,9 +14,6 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Password is required"],
-  },
-  cpassword:{
-    type:String
   },
   phone: Number,
   email: String,
@@ -35,6 +28,8 @@ const UserSchema = new mongoose.Schema({
     type:Number,
     default:0
   },
+  profilePicture:"",
+  coverPicture:"",
   isFollowing:[
     {
       type:String,
@@ -45,6 +40,18 @@ const UserSchema = new mongoose.Schema({
     {
       type:String,
       ref:"User",
+    }
+  ],
+  likedBlogs:[
+    {
+      type : String,
+      ref: "Post",
+    }
+  ],
+  savedBlogs:[
+    {
+      type: String,
+      ref: "Post",
     }
   ],
   deletedBlogs:[

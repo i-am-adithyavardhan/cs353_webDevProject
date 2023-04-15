@@ -8,7 +8,11 @@ import { useState, useEffect} from "react";
 import axios from "axios";
 import Login from "./Components/Navcomponents/Login";
 import Userprofilemain from "./Components/Userprofilepage/Userprofilemain";
+import UserBlogs from "./Components/Userprofilepage/UserBlogs";
+import Profile from "./Components/Userprofilepage/Profile";
+import Extra from "./Components/Navcomponents/Extra";
 import CreateBlogmain from "./Components/CreateBlogpage/CreateBlogmain";
+import UpdateProfile from "./Components/Userprofilepage/UpdateProfile";
 //import { useNavigate } from "react-router-dom";
 
 
@@ -144,13 +148,13 @@ function App() {
     try{
     const res = await axios.post("http://localhost:5000/api/auth/login", loginData);
     // const data = await res.json();
-    console.log(typeof(res.data));
-    console.log("check")
+    // console.log(typeof(res.data));
+    // console.log("check")
     console.log(res.data.user);
     if(res.data.user){
-      localStorage.setItem("user", JSON.stringify(res.data.user))
+      await localStorage.setItem("user", JSON.stringify(res.data.user))
       alert("login successful");
-      window.location.href="/userprofile"
+      window.location.href=`/userprofile/${res.data.user.username}`
     }
     else{
       alert("Invalid username or password");
@@ -194,7 +198,14 @@ function App() {
               />
             }
           />
-          <Route path="/userprofile" element={<Userprofilemain isLogin={isLogin}/>} />
+          {/* <Route path="/userprofile" element={<Userprofilemain isLogin={isLogin}/>} /> */}
+          <Route path="/userprofile" >
+            <Route index element = {<Extra/>}/>
+            <Route path=":username" element={<Profile/>}/> {/* display specific user with id. */}
+            <Route path=":username/:blogsType" element={<UserBlogs/>}/>
+            <Route path=":username/updateUserDetails" element={<UpdateProfile/>}/>
+            {/* <Route path=":username/:savedBlogs" element={<UserBlogs/>}/> */}
+          </Route> {/* without any id profile page is redirected to login page! */}
           <Route
             path="/signup"
             element={

@@ -49,8 +49,9 @@ const CreateBlogmain = ({categories}) => {
     console.log(userId)
     // console.log(myData);
     // console.log(file);
-    const base64 = await convertTOBase64(file);
-    const newData = {userId,...blogData,image: base64}
+    const base64 = file?
+      await convertTOBase64(file) : "";
+      const newData = {userId,...blogData,image: base64}
     console.log(newData)
     const res = await axios.post("http://localhost:5000/api/blogs/createblog",newData);
     console.log("response"+res.data)

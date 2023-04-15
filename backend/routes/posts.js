@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Post = require("../models/Post");
 const User = require("../models/User");
-import { ObjectId } from 'mongodb';
+// import { ObjectId } from 'mongodb';
 
 
 //CREATE POST
@@ -16,11 +16,11 @@ router.post("/createblog",async(req,res)=>{
     console.log(req.body)
     // console.log("image : " + image);
     try{
-          const userfound = await User.findOne({_id:userId});
+          const userfound = await User.findById(userId);
           if(!userfound){
             return res.json({msg: "User not found"});
           }
-          console.log(userfound)
+          console.log("user: ",userfound)
           const savedBlog = await Post.create({
             title:title,
             description:description,
@@ -28,23 +28,23 @@ router.post("/createblog",async(req,res)=>{
             image:image,
             author:userId,
           })
-          
-        userfound.blogs.push(savedBlog);
-        userfound.noOfBlogs+=1;
-         //await userfound.updateOne({$set:{noOfBlogs: userfound.noOfBlogs+1}},{$push: {blogs: savedBlog}})
+        console.log("savedBlog" ,savedBlog)
+        console.log("blogs: ",userfound.blogs)
+        // userfound.blogs.push(savedBlog._id);
+        // userfound.noOfBlogs+=1;
+         await userfound.updateOne({$set:{noOfBlogs: userfound.noOfBlogs+1},$push: {blogs: savedBlog}})
   
-          await userfound.save();
-          
+        //   await userfound.save();
+            res.status(200).json("success");
         }
   
         catch(err) {
-              console.log(err)
-           }
-      res.json(200);
+              console.log(err);
+              res.json(err)
+        }
+      
   
   })
-
-
 
 //GET A POST
 router.get("/:id",async(req,res)=>{
@@ -58,14 +58,81 @@ router.get("/:id",async(req,res)=>{
     }
 })
 
+//GET USER'S ALL POSTS 
+router.get("/profile/:username",async(req,res)=>{
+    if(req.query.blogType === "likedBlogs" || req.query.blogType === "savedBlogs"){
+        try{
+            const user = await User.findOne({username: req.params.username})
+            console.log("user : ",user)
+            const reqBlogs = req.query.blogType === "likedBlogs"?
+            (
+                await Promise.all(
+                user.likedBlogs.map((blog)=>{
+                    console.log("blog",blog)
+                    return Post.findOne({_id: blog})
+                })
+                )
+            ):(
+                await Promise.all(
+                    user.savedBlogs.map((blog)=>{
+                        console.log("blog",blog)
+                        return Post.findOne({_id: blog})
+                    })
+                    )
+            )
+            console.log("p : "+reqBlogs)
+            res.status(200).json(reqBlogs);
+        }
+        catch(err){
+            console.log(err)
+            return res.status(500).json(err);
+        }
+    }
+    else{
+        try{
+            const user = await User.findOne({username: req.params.username});
+            const posts = await Post.find({author: user._id});
+            console.log("posts : "+posts);
+            res.status(200).json(posts);
+        }
+        catch(err){
+            res.status(500).json(err);
+        }
+    }
+    // console.log("postTYPE" , posts)
+    // console.log(req.query.blogType)
+    console.log("end")
+})
+
+//GET USER LIKED OR SAVED POSTS BY QUERY
+// router.get("/profile/:username",async(req,res)=>{ 
+//     try{
+//         const user = await User.findOne({username: username})
+//         console.log("user : ",user)
+//         const reqBlogs = await Promise.all(
+//             user.likedBlogs.map((blog)=>{
+//                 console.log(blog)
+//                 return Post.findOne({_id: blog})
+//             })
+//         );
+//         console.log("p : "+reqBlogs)
+//         res.status(200).json(reqBlogs);
+//     }
+//     catch(err){
+//         console.log(err)
+//         return res.status(500).json(err);
+//     }
+// })
+
 //GET TIMELINE POSTS
 router.get("/timeline/:id",async(req,res)=>{
     try{
         //user logged in - shld also implement for not loggedin users.
         console.log(typeof(req.params.id));
-        const objectId = new ObjectId(req.params.id);
+        console.log(req.params.id)
+        // const objectId = new ObjectId(req.params.id);
         // const curUser = await User.findOne({_id: req.params.id});
-        const curUser = await User.findOne({_id: objectId});
+        const curUser = await User.findOne({_id: req.params.id});
 
         console.log(curUser._id)
         // const userPosts = await Post.find({author: curUser._id});
@@ -79,6 +146,7 @@ router.get("/timeline/:id",async(req,res)=>{
         ); //saving all to friendPosts
         const finalPosts = userPosts.concat(...friendPosts)
         console.log(finalPosts)
+        console.log("sending these...")
         res.json(finalPosts)
         // res.json(userPosts);
     }
@@ -138,12 +206,15 @@ router.delete("/:id",async(req,res)=>{
 router.put("/:id/like",async(req,res)=>{
     try{
         const post = await Post.findById(req.params.id);
+        const user = await User.findById(req.body.userId);
         if(!post.likedUsers.includes(req.body.userId)){
             await post.updateOne({$push:{likedUsers:req.body.userId}});
+            await user.updateOne({$push:{likedBlogs:req.params.id}});
             res.status(200).json("You liked this post!");
         }
         else{
             await post.updateOne({$pull:{likedUsers:req.body.userId}});
+            await user.updateOne({$pull:{likedBlogs:req.params.id}});
             res.status(403).json("You disliked this post!");
         }
     }

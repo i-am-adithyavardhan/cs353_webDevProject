@@ -22,7 +22,7 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    setUser(localStorage.getItem("user"));
+    setUser(JSON.parse(localStorage.getItem("user")));
   }, []);
 
   return (
@@ -41,7 +41,15 @@ const Navbar = () => {
         </li>
         <li className="nav-links">
           {/* <a href='/userprofile'>Profile</a> */}
-          <Link to="/userprofile">Profile</Link>
+          {
+          user? 
+          (
+            // console.log(user),
+            // console.log(typeof(user)),
+            <Link to = {`/userprofile/${user.username}`}>UProfile</Link>
+          )
+          :(<Link to="/userprofile">Profile</Link>)
+          }
         </li>
         <li className="nav-links">
           {/* <a href='/signup'>signup</a> */}
