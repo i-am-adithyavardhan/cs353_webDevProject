@@ -1,0 +1,6 @@
+*node_modules/
+backend/config/.env
+
+~$CONTENT.docx
+1 index.docx
+2 CONTENT.docx
